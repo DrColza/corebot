@@ -15,6 +15,9 @@ project(':backends:items').name = 'backends-items'
 include ':bots:common'
 project(':bots:common').name = 'bots-common'
 
+include ':bots:generic'
+project(':bots:generic').name = 'bots-generic'
+
 include ':bots:slack-deploy'
 project(':bots:slack-deploy').name = 'bots-slack-deploy'
 

@@ -1,0 +1,49 @@
+buildscript {
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
+    }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'application'
+
+repositories {
+    maven { url 'https://gatehillsoftware-maven.s3.amazonaws.com/snapshots/' }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$version_kotlin"
+
+    compile project(':bots:bots-common')
+
+    // FIXME remove this
+    compile project(':backends:backends-items')
+
+    // FIXME remove this
+    compile project(':stores:stores-redis')
+
+    compile "com.gatehill.mcl:maven-classloader:0.1.0-SNAPSHOT"
+}
+
+mainClassName = 'com.gatehill.corebot.MainKt'
+
+task createStartScripts(type: CreateStartScripts) {
+    applicationName = 'corebot'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            repositories {
+                maven {
+                    url mavenSnapshotRepository
+                    credentials(AwsCredentials) {
+                        accessKey awsAccessKey
+                        secretKey awsSecretKey
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,14 +1,14 @@
 package com.gatehill.corebot.plugin
 
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import com.gatehill.corebot.plugin.config.PluginSettings
-import com.gatehill.corebot.plugin.model.Plugin
-import com.gatehill.corebot.util.jsonMapper
-import com.gatehill.mcl.ChildFirstDownloadingClassLoader
-import com.gatehill.mcl.exclusion
-import com.gatehill.mcl.jcenter
-import com.gatehill.mcl.jitpack
-import com.gatehill.mcl.mavenCentral
+import com.gatehill.corebot.plugin.model.PluginWrapper
+import com.gatehill.corebot.store.DataStoreModule
+import com.gatehill.corebot.util.yamlMapper
+import com.gatehill.dlcl.classloader.ChildFirstDownloadingClassLoader
+import com.gatehill.dlcl.exclusion
+import com.gatehill.dlcl.jcenter
+import com.gatehill.dlcl.jitpack
+import com.gatehill.dlcl.mavenCentral
 import com.google.inject.Module
 
 val repos = listOf(
@@ -46,20 +46,35 @@ class PluginService {
                 exclusion("com.gatehill.corebot", "core-engine")
         )
 
-        return fetchPluginConfig().flatMap { (dependency, classes) ->
-            val classLoader = ChildFirstDownloadingClassLoader(
-                    PluginSettings.localRepo, dependency, excludes, repos, this::class.java.classLoader)
+        val pluginConfig = fetchPluginConfig()
 
-            classes.map { className ->
-                @Suppress("UNCHECKED_CAST")
-                val moduleClass: Class<Module> = classLoader.loadClass(className) as Class<Module>
-                moduleClass.newInstance()
-            }
+        return mutableListOf<Module>().apply {
+            // frontends and backends are instantiated the same way
+            addAll(pluginConfig.frontends.union(pluginConfig.backends).flatMap { (dependency, classes) ->
+                val classLoader = ChildFirstDownloadingClassLoader(
+                        PluginSettings.localRepo, dependency, excludes, repos, PluginService::class.java.classLoader)
+
+                classes.map { className ->
+                    @Suppress("UNCHECKED_CAST")
+                    val moduleClass: Class<Module> = classLoader.loadClass(className) as Class<Module>
+                    moduleClass.newInstance()
+                }
+            })
+
+            // stores must be instantiated with a name
+            addAll(pluginConfig.stores.map { (storeName, plugin) ->
+                val classLoader = ChildFirstDownloadingClassLoader(
+                        PluginSettings.localRepo, plugin.dependency, excludes, repos, PluginService::class.java.classLoader)
+
+                DataStoreModule.storeClassLoaders += classLoader
+
+                DataStoreModule(storeName)
+            })
         }
     }
 
-    private fun fetchPluginConfig(): List<Plugin> = PluginSettings.pluginsFile?.let {
+    private fun fetchPluginConfig(): PluginWrapper = PluginSettings.pluginsFile?.let {
         @Suppress("UNCHECKED_CAST")
-        jsonMapper.readValue<List<Plugin>>(it.toFile(), jacksonTypeRef<List<Plugin>>())
-    } ?: emptyList()
+        yamlMapper.readValue(it.toFile(), PluginWrapper::class.java)
+    }!!
 }

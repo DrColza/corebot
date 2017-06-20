@@ -3,7 +3,6 @@ package com.gatehill.corebot
 import com.gatehill.corebot.chat.ActionTemplateConverter
 import com.gatehill.corebot.chat.NoOpActionTemplateConverter
 import com.gatehill.corebot.plugin.PluginService
-import com.gatehill.corebot.store.DataStoreModule
 import com.google.inject.AbstractModule
 import com.google.inject.Module
 
@@ -20,8 +19,5 @@ private class BotModule : AbstractModule() {
     override fun configure() {
         bind(BotBootstrap::class.java).asEagerSingleton()
         bind(ActionTemplateConverter::class.java).to(NoOpActionTemplateConverter::class.java).asSingleton()
-
-        // data stores
-        install(DataStoreModule("itemStore"))
     }
 }

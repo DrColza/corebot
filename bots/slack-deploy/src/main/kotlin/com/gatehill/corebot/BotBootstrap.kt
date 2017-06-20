@@ -18,7 +18,7 @@ import javax.inject.Inject
 /**
  * @author Pete Cornish {@literal <outofcoffee@gmail.com>}
  */
-class Bootstrap @Inject constructor(actionDriverFactory: ActionDriverFactory,
+class BotBootstrap @Inject constructor(actionDriverFactory: ActionDriverFactory,
                                     templateService: TemplateService,
                                     templateConfigService: TemplateConfigService) {
     init {

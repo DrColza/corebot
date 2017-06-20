@@ -9,12 +9,12 @@ import com.gatehill.corebot.store.DataStoreModule
 import com.google.inject.AbstractModule
 
 fun main(args: Array<String>) {
-    Bot.build(DeployBotModule(), SlackModule()).start()
+    Bot.build(BotModule(), SlackModule()).start()
 }
 
-private class DeployBotModule : AbstractModule() {
+private class BotModule : AbstractModule() {
     override fun configure() {
-        bind(Bootstrap::class.java).asEagerSingleton()
+        bind(BotBootstrap::class.java).asEagerSingleton()
         bind(LockService::class.java).asSingleton()
         bind(ActionFactoryConverter::class.java).to(TriggerActionFactoryConverter::class.java).asSingleton()
 

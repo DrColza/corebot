@@ -1,6 +1,5 @@
 package com.gatehill.corebot.config
 
-import com.gatehill.corebot.store.DataStore
 import com.gatehill.corebot.store.InMemoryDataStoreImpl
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -27,9 +26,7 @@ object Settings {
         /**
          * The implementation for the `DataStore`.
          */
-        @Suppress("UNCHECKED_CAST")
-        val implementationClass = Class.forName(System.getenv("DATA_STORE_IMPL") ?:
-                InMemoryDataStoreImpl::class.java.canonicalName) as Class<DataStore>
+        val implementationClass: String = System.getenv("DATA_STORE_IMPL") ?: InMemoryDataStoreImpl::class.java.canonicalName
     }
 
     val dataStores = DataStores()

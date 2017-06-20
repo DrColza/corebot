@@ -35,6 +35,8 @@ allprojects {
     apply plugin: "maven-publish"
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = "2.14.1"
+apply plugin: 'project-report'
+
+htmlDependencyReport {
+    projects = project.allprojects
 }

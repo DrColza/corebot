@@ -17,12 +17,9 @@ dependencies {
     compile project(':bots:bots-common')
 
     // FIXME remove this
-    compile project(':backends:backends-items')
-
-    // FIXME remove this
     compile project(':stores:stores-redis')
 
-    compile "com.gatehill.mcl:maven-classloader:0.1.0-SNAPSHOT"
+    compile "com.gatehill.mcl:maven-classloader:0.1.3-SNAPSHOT"
 }
 
 mainClassName = 'com.gatehill.corebot.MainKt'

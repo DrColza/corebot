@@ -1,4 +1,4 @@
-package com.gatehill.corebot
+package com.gatehill.corebot.driver.items
 
 import com.gatehill.corebot.action.factory.ShowHelpFactory
 import com.gatehill.corebot.chat.template.TemplateConfigService
@@ -17,7 +17,7 @@ import javax.inject.Inject
 /**
  * @author Pete Cornish {@literal <outofcoffee@gmail.com>}
  */
-class Bootstrap @Inject constructor(actionDriverFactory: ActionDriverFactory,
+class ItemsDriverBootstrap @Inject constructor(actionDriverFactory: ActionDriverFactory,
                                     templateService: TemplateService,
                                     templateConfigService: TemplateConfigService) {
     init {

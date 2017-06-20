@@ -6,6 +6,7 @@ import com.google.inject.AbstractModule
 
 class ItemsDriverModule : AbstractModule() {
     override fun configure() {
+        bind(ItemsDriverBootstrap::class.java).asEagerSingleton()
         bind(ClaimService::class.java).asSingleton()
     }
 }

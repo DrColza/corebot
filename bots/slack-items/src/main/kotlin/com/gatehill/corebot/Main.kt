@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
 
 private class ItemsBotModule : AbstractModule() {
     override fun configure() {
-        bind(Bootstrap::class.java).asEagerSingleton()
+        bind(BotBootstrap::class.java).asEagerSingleton()
         bind(ActionFactoryConverter::class.java).to(NoOpActionFactoryConverter::class.java).asSingleton()
 
         // data stores

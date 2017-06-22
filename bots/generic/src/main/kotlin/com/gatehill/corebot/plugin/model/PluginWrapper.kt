@@ -6,4 +6,4 @@ package com.gatehill.corebot.plugin.model
  */
 data class PluginWrapper(val frontends: List<PluginEntry> = emptyList(),
                          val backends: List<PluginEntry> = emptyList(),
-                         val stores: Map<String, PluginEntry> = emptyMap())
+                         val storage: StorageWrapper?)

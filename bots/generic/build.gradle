@@ -16,7 +16,7 @@ dependencies {
 
     compile project(':bots:bots-common')
 
-    compile "com.gatehill.dlcl:downloading-classloader:0.1.4-SNAPSHOT"
+    compile "com.gatehill.dlcl:downloading-classloader:0.1.5-SNAPSHOT"
 }
 
 mainClassName = 'com.gatehill.corebot.MainKt'

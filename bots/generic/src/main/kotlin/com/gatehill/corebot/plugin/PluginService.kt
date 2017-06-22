@@ -46,13 +46,17 @@ class PluginService {
                 exclusion("com.gatehill.corebot", "core-engine")
         )
 
+        val classLoader = ChildFirstDownloadingClassLoader(
+                PluginSettings.localRepo, repos, PluginService::class.java.classLoader)
+
+        DataStoreModule.storeClassLoaders += classLoader
+
         val pluginConfig = fetchPluginConfig()
 
         return mutableListOf<Module>().apply {
             // frontends and backends are instantiated the same way
             addAll(pluginConfig.frontends.union(pluginConfig.backends).flatMap { (dependency, classes) ->
-                val classLoader = ChildFirstDownloadingClassLoader(
-                        PluginSettings.localRepo, dependency, excludes, repos, PluginService::class.java.classLoader)
+                classLoader.fetch(dependency, excludes)
 
                 classes.map { className ->
                     @Suppress("UNCHECKED_CAST")
@@ -62,14 +66,10 @@ class PluginService {
             })
 
             // stores must be instantiated with a name
-            addAll(pluginConfig.stores.map { (storeName, plugin) ->
-                val classLoader = ChildFirstDownloadingClassLoader(
-                        PluginSettings.localRepo, plugin.dependency, excludes, repos, PluginService::class.java.classLoader)
-
-                DataStoreModule.storeClassLoaders += classLoader
-
-                DataStoreModule(storeName)
-            })
+            pluginConfig.storage?.let { (dependencies, stores) ->
+                dependencies.map { classLoader.fetch(it, excludes) }
+                addAll(stores.map { DataStoreModule(it) })
+            }
         }
     }
 

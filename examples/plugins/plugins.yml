@@ -9,6 +9,8 @@ backends:
   classes:
   - com.gatehill.corebot.driver.items.ItemsDriverModule
 
-stores:
-  itemStore:
-    dependency: com.gatehill.corebot:stores-redis:0.9.0-SNAPSHOT
+storage:
+  stores:
+    - itemStore
+  dependencies:
+    - com.gatehill.corebot:stores-redis:0.9.0-SNAPSHOT

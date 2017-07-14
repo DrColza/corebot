@@ -1,17 +1,17 @@
 ---
 frontends:
-- dependency: com.gatehill.corebot:frontends-slack:0.9.0
+- dependency: com.gatehill.corebot:frontends-slack:0.10.0-SNAPSHOT
   classes:
   - com.gatehill.corebot.SlackModule
 
 backends:
-- dependency: com.gatehill.corebot:backends-deployment:0.9.0
+- dependency: com.gatehill.corebot:backends-deployment:0.10.0-SNAPSHOT
   classes:
   - com.gatehill.corebot.driver.jobs.JobsDriverModule
   - com.gatehill.corebot.driver.jenkins.JenkinsDriverModule
   - com.gatehill.corebot.driver.rundeck.RundeckDriverModule
 
 storage:
+  dependencies: []
   stores:
     - lockStore
-  dependencies: []

@@ -18,21 +18,20 @@ import javax.inject.Inject
  * @author Pete Cornish {@literal <outofcoffee@gmail.com>}
  */
 class ItemsDriverBootstrap @Inject constructor(actionDriverFactory: ActionDriverFactory,
-                                    templateService: TemplateService,
-                                    templateConfigService: TemplateConfigService) {
+                                               templateService: TemplateService,
+                                               templateConfigService: TemplateConfigService) {
     init {
         // drivers
         actionDriverFactory.registerDriver("items", ItemsActionDriverImpl::class.java)
 
         // templates
         templateConfigService.registerClasspathTemplateFile("/items-templates.yml")
-        templateService.registerTemplate(ShowHelpFactory::class.java)
-        templateService.registerTemplate(BorrowItemFactory::class.java)
-        templateService.registerTemplate(BorrowItemAsUserFactory::class.java)
-        templateService.registerTemplate(ReturnItemFactory::class.java)
-        templateService.registerTemplate(EvictItemFactory::class.java)
-        templateService.registerTemplate(EvictUserFromItemFactory::class.java)
-        templateService.registerTemplate(StatusItemFactory::class.java)
-        templateService.registerTemplate(StatusAllFactory::class.java)
+        templateService.registerFactory(BorrowItemFactory::class.java)
+        templateService.registerFactory(BorrowItemAsUserFactory::class.java)
+        templateService.registerFactory(ReturnItemFactory::class.java)
+        templateService.registerFactory(EvictItemFactory::class.java)
+        templateService.registerFactory(EvictUserFromItemFactory::class.java)
+        templateService.registerFactory(StatusItemFactory::class.java)
+        templateService.registerFactory(StatusAllFactory::class.java)
     }
 }

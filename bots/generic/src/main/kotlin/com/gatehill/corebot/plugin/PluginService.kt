@@ -11,10 +11,12 @@ import com.gatehill.dlcl.jitpack
 import com.gatehill.dlcl.mavenCentral
 import com.google.inject.Module
 
-val repos = listOf(
+// TODO move this into plugins config file
+private val repos = listOf(
         mavenCentral,
         jcenter,
         jitpack,
+        "exposed" to "https://dl.bintray.com/kotlin/exposed",
         "gatehill" to "https://gatehillsoftware-maven.s3.amazonaws.com/snapshots/"
 )
 

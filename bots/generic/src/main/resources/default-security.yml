@@ -8,6 +8,14 @@ security:
     admin:
       permissions:
         - help
+        - trigger
+        - enable
+        - disable
+        - lock_action
+        - unlock_action
+        - status
+        - lock_option
+        - unlock_option
         - item_borrow
         - item_borrow_as_user
         - item_return

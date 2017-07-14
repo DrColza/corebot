@@ -2,11 +2,12 @@
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-DOCKERFILE_PATH="${SCRIPT_DIR}/../bots/slack-"
+DOCKERFILE_PATH="${SCRIPT_DIR}/../bots/"
 IMAGE_BASE_NAME="outofcoffee/corebot"
 IMAGES=(
-    "deploy"
-    "items"
+    "generic"
+    "slack-deploy"
+    "slack-items"
 )
 DOCKER_LOGIN_ARGS=""
 

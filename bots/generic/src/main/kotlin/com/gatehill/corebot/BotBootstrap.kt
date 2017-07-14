@@ -1,7 +1,7 @@
 package com.gatehill.corebot
 
-import com.gatehill.corebot.chat.TemplateService
-import com.gatehill.corebot.chat.model.template.ShowHelpTemplate
+import com.gatehill.corebot.action.factory.ShowHelpFactory
+import com.gatehill.corebot.chat.template.TemplateService
 import javax.inject.Inject
 
 /**
@@ -9,6 +9,6 @@ import javax.inject.Inject
  */
 class BotBootstrap @Inject constructor(templateService: TemplateService) {
     init {
-        templateService.registerTemplate(ShowHelpTemplate::class.java)
+        templateService.registerFactory(ShowHelpFactory::class.java)
     }
 }

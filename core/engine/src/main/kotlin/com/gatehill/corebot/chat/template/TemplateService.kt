@@ -29,7 +29,7 @@ class TemplateService @Inject constructor(private val injector: Injector,
      */
     private val actionFactories = mutableSetOf<Class<out ActionFactory>>()
 
-    fun registerTemplate(factory: Class<out ActionFactory>) {
+    fun registerFactory(factory: Class<out ActionFactory>) {
         actionFactories += factory
     }
 

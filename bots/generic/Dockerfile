@@ -4,8 +4,8 @@ MAINTAINER Pete Cornish <outofcoffee@gmail.com>
 
 RUN mkdir -p /opt/corebot /opt/corebot/config
 
-ADD build/install/bots-slack-items /opt/corebot
+ADD build/install/bots-generic /opt/corebot
 
 WORKDIR "/opt/corebot"
 
-ENTRYPOINT [ "./bin/bots-slack-items" ]
+ENTRYPOINT [ "./bin/bots-generic" ]

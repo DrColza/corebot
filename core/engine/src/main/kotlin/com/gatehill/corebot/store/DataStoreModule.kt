@@ -15,21 +15,17 @@ class DataStoreModule(private val storeName: String) : AbstractModule() {
     private val logger = LogManager.getLogger(DataStoreModule::class.java)
 
     override fun configure() {
-        // start from latest added
-        storeClassLoaders.reversed().forEach { classLoader ->
-            @Suppress("UNCHECKED_CAST")
-            val dataStoreImplClass = classLoader.loadClass(Settings.dataStores.implementationClass) as Class<DataStore>
+        val classLoader = storeClassLoader ?: DataStoreModule::class.java.classLoader
 
-            logger.debug("Using '$storeName' data store implementation: ${dataStoreImplClass.canonicalName}")
+        @Suppress("UNCHECKED_CAST")
+        val dataStoreImplClass = classLoader.loadClass(Settings.dataStores.implementationClass) as Class<DataStore>
 
-            bind(DataStore::class.java).annotatedWith(Names.named(storeName))
-                    .to(dataStoreImplClass).asSingleton()
+        logger.debug("Using '$storeName' data store implementation: ${dataStoreImplClass.canonicalName}")
 
-            return // return from the enclosing function, not the lambda
-        }
+        bind(DataStore::class.java).annotatedWith(Names.named(storeName)).to(dataStoreImplClass).asSingleton()
     }
 
     companion object {
-        val storeClassLoaders = mutableListOf<ClassLoader>()
+        var storeClassLoader: ClassLoader? = null
     }
 }

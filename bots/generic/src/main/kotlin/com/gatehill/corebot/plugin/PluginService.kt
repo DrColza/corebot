@@ -4,6 +4,7 @@ import com.gatehill.corebot.plugin.config.PluginSettings
 import com.gatehill.corebot.plugin.model.PluginWrapper
 import com.gatehill.corebot.store.DataStoreModule
 import com.gatehill.corebot.util.yamlMapper
+import com.gatehill.dlcl.Downloader
 import com.gatehill.dlcl.classloader.ChildFirstDownloadingClassLoader
 import com.gatehill.dlcl.exclusion
 import com.gatehill.dlcl.jcenter
@@ -25,7 +26,7 @@ private val repos = listOf(
  * @author pete
  */
 class PluginService {
-    fun loadPluginInstances(): Collection<Module> {
+    fun fetchPlugins() {
         // TODO derive this from the engine and api modules' transitive dependencies
         val excludes = listOf(
                 exclusion("org.jetbrains.kotlin", "kotlin-stdlib"),
@@ -48,17 +49,30 @@ class PluginService {
                 exclusion("com.gatehill.corebot", "core-engine")
         )
 
+        val pluginConfig = fetchPluginConfig()
+
+        mutableListOf<String>().apply {
+            addAll(pluginConfig.frontends.map { it.dependency })
+            addAll(pluginConfig.backends.map { it.dependency })
+            pluginConfig.storage?.let { addAll(it.dependencies) }
+
+        }.forEach {
+            Downloader(PluginSettings.localRepo, it, excludes, repos).download()
+        }
+    }
+
+    fun loadPluginInstances(): Collection<Module> {
         val classLoader = ChildFirstDownloadingClassLoader(
                 PluginSettings.localRepo, repos, PluginService::class.java.classLoader)
 
-        DataStoreModule.storeClassLoaders += classLoader
+        classLoader.load()
+        DataStoreModule.storeClassLoader = classLoader
 
         val pluginConfig = fetchPluginConfig()
 
         return mutableListOf<Module>().apply {
             // frontends and backends are instantiated the same way
-            addAll(pluginConfig.frontends.union(pluginConfig.backends).flatMap { (dependency, classes) ->
-                classLoader.fetch(dependency, excludes)
+            addAll(pluginConfig.frontends.union(pluginConfig.backends).flatMap { (_, classes) ->
 
                 classes.map { className ->
                     @Suppress("UNCHECKED_CAST")
@@ -68,8 +82,7 @@ class PluginService {
             })
 
             // stores must be instantiated with a name
-            pluginConfig.storage?.let { (dependencies, stores) ->
-                dependencies.map { classLoader.fetch(it, excludes) }
+            pluginConfig.storage?.let { (_, stores) ->
                 addAll(stores.map { DataStoreModule(it) })
             }
         }

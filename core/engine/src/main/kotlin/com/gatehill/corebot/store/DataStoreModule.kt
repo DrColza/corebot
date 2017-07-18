@@ -1,6 +1,7 @@
 package com.gatehill.corebot.store
 
 import com.gatehill.corebot.asSingleton
+import com.gatehill.corebot.classloader.ClassLoaderUtil
 import com.gatehill.corebot.config.Settings
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
@@ -15,17 +16,12 @@ class DataStoreModule(private val storeName: String) : AbstractModule() {
     private val logger = LogManager.getLogger(DataStoreModule::class.java)
 
     override fun configure() {
-        val classLoader = storeClassLoader ?: DataStoreModule::class.java.classLoader
-
         @Suppress("UNCHECKED_CAST")
-        val dataStoreImplClass = classLoader.loadClass(Settings.dataStores.implementationClass) as Class<DataStore>
+        val dataStoreImplClass = ClassLoaderUtil.classLoader
+                .loadClass(Settings.dataStores.implementationClass) as Class<DataStore>
 
         logger.debug("Using '$storeName' data store implementation: ${dataStoreImplClass.canonicalName}")
 
         bind(DataStore::class.java).annotatedWith(Names.named(storeName)).to(dataStoreImplClass).asSingleton()
-    }
-
-    companion object {
-        var storeClassLoader: ClassLoader? = null
     }
 }

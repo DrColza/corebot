@@ -11,7 +11,4 @@ backends:
   - com.gatehill.corebot.driver.jenkins.JenkinsDriverModule
   - com.gatehill.corebot.driver.rundeck.RundeckDriverModule
 
-storage:
-  dependencies: []
-  stores:
-    - lockStore
+storage: []

@@ -1,6 +1,7 @@
 package com.gatehill.corebot
 
 import com.gatehill.corebot.chat.ChatService
+import com.gatehill.corebot.classloader.ClassLoaderUtil
 import com.google.inject.AbstractModule
 import com.google.inject.Guice.createInjector
 import com.google.inject.Module
@@ -29,19 +30,28 @@ class Bot @Inject constructor(private val chatService: ChatService) {
     companion object Builder {
         private val logger: Logger = LogManager.getLogger(Builder::class.java)
 
+        private val coreModules = listOf(
+                "com.gatehill.corebot.CoreModule",
+                "com.gatehill.corebot.CommonBotModule"
+        )
+
         /**
          * Construct a new `Bot` and wire up its dependencies.
          */
         fun build(vararg extensionModules: Module): Bot {
-            val injector = createInjector(CoreModule(), CommonBotModule(), object : AbstractModule() {
-                override fun configure() {
-                    extensionModules.forEach {
-                        logger.debug("Installing injection module: ${it.javaClass.canonicalName}")
-                        install(it)
+            val modules = mutableListOf<Module>().apply {
+                addAll(coreModules.map { ClassLoaderUtil.classLoader.loadClass(it).newInstance() as Module })
+                add(object : AbstractModule() {
+                    override fun configure() {
+                        extensionModules.forEach {
+                            logger.debug("Installing injection module: ${it.javaClass.canonicalName}")
+                            install(it)
+                        }
                     }
-                }
-            })
-            return injector.getInstance(Bot::class.java)
+                })
+            }
+
+            return createInjector(modules).getInstance(Bot::class.java)
         }
     }
 }

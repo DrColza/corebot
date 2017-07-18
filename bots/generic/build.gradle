@@ -1,4 +1,7 @@
 buildscript {
+    ext {
+        version_dlcl = '0.2.0-SNAPSHOT'
+    }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
     }
@@ -16,7 +19,7 @@ dependencies {
 
     compile project(':bots:bots-common')
 
-    compile "com.gatehill.dlcl:downloading-classloader:0.1.8-SNAPSHOT"
+    compile "com.gatehill.dlcl:downloading-classloader:$version_dlcl"
 }
 
 mainClassName = 'com.gatehill.corebot.MainKt'

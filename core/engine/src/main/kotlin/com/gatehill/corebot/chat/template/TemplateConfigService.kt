@@ -6,6 +6,7 @@ import com.gatehill.corebot.action.factory.readActionFactoryMetadata
 import com.gatehill.corebot.chat.filter.FilterConfig
 import com.gatehill.corebot.chat.filter.RegexFilter
 import com.gatehill.corebot.chat.filter.StringFilter
+import com.gatehill.corebot.classloader.ClassLoaderUtil
 import com.gatehill.corebot.util.yamlMapper
 import java.io.InputStream
 import java.nio.file.Path
@@ -35,7 +36,8 @@ class TemplateConfigService {
 
         templateFiles.forEach {
             if (it.startsWith(classpathPrefix)) {
-                TemplateConfigService::class.java.getResourceAsStream(it.substring(classpathPrefix.length))
+                val classpathFile = it.substring(classpathPrefix.length + if (it.startsWith("$classpathPrefix/")) 1 else 0)
+                ClassLoaderUtil.classLoader.getResourceAsStream(classpathFile)
             } else {
                 Paths.get(it).toFile().inputStream()
             }.use {

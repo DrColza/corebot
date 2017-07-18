@@ -1,9 +1,12 @@
 package com.gatehill.corebot.plugin
 
+import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
+import com.gatehill.corebot.classloader.ClassLoaderUtil
 import com.gatehill.corebot.plugin.config.PluginSettings
+import com.gatehill.corebot.plugin.model.PluginEnvironment
 import com.gatehill.corebot.plugin.model.PluginWrapper
-import com.gatehill.corebot.store.DataStoreModule
 import com.gatehill.corebot.util.yamlMapper
+import com.gatehill.dlcl.Collector
 import com.gatehill.dlcl.Downloader
 import com.gatehill.dlcl.classloader.ChildFirstDownloadingClassLoader
 import com.gatehill.dlcl.exclusion
@@ -12,84 +15,56 @@ import com.gatehill.dlcl.jitpack
 import com.gatehill.dlcl.mavenCentral
 import com.google.inject.Module
 
-// TODO move this into plugins config file
-private val repos = listOf(
-        mavenCentral,
-        jcenter,
-        jitpack,
-        "exposed" to "https://dl.bintray.com/kotlin/exposed",
-        "gatehill" to "https://gatehillsoftware-maven.s3.amazonaws.com/snapshots/"
-)
-
 /**
  *
  * @author pete
  */
 class PluginService {
+    fun clearRepo() {
+        Collector(PluginSettings.localRepo).clearCollected()
+    }
+
     fun fetchPlugins() {
-        // TODO derive this from the engine and api modules' transitive dependencies
-        val excludes = listOf(
-                exclusion("org.jetbrains.kotlin", "kotlin-stdlib"),
-                exclusion("org.jetbrains.kotlin", "kotlin-reflect"),
-                exclusion("org.jetbrains", "annotations"),
-                exclusion("javax.inject", "javax.inject"),
-                exclusion("org.apache.logging.log4j", "log4j-api"),
-                exclusion("com.google.inject", "guice"),
-                exclusion("com.google.guava", "guava"),
-                exclusion("com.fasterxml.jackson.module", "jackson-module-kotlin"),
-                exclusion("com.fasterxml.jackson.core", "jackson-databind"),
-                exclusion("com.fasterxml.jackson.core", "jackson-annotations"),
-                exclusion("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml"),
-                exclusion("com.fasterxml.jackson.core", "jackson-core"),
-                exclusion("org.yaml", "snakeyaml"),
-                exclusion("aopalliance", "aopalliance"),
-                exclusion("ch.qos.logback", "logback-classic"),
-                exclusion("org.slf4j", "slf4j-api"),
-                exclusion("com.gatehill.corebot", "core-api"),
-                exclusion("com.gatehill.corebot", "core-engine")
-        )
+        val pluginEnvironment = loadPluginEnvironment()
+        val repos = listRepos(pluginEnvironment)
+        val excludes = pluginEnvironment.exclusions.map { exclusion(it.groupId, it.artifactId) }
 
-        val pluginConfig = fetchPluginConfig()
-
-        mutableListOf<String>().apply {
-            addAll(pluginConfig.frontends.map { it.dependency })
-            addAll(pluginConfig.backends.map { it.dependency })
-            pluginConfig.storage?.let { addAll(it.dependencies) }
-
-        }.forEach {
-            Downloader(PluginSettings.localRepo, it, excludes, repos).download()
+        with(fetchPluginConfig()) {
+            frontends.map { it.dependency }
+                    .union(backends.map { it.dependency })
+                    .union(storage.map { it.dependency })
+                    .forEach { Downloader(PluginSettings.localRepo, it, excludes, repos).download() }
         }
     }
 
+    private fun loadPluginEnvironment() = yamlMapper.readValue<PluginEnvironment>(ClassLoaderUtil.classLoader.getResourceAsStream(
+            "plugin-environment.yml"), jacksonTypeRef<PluginEnvironment>())
+
+    private fun listRepos(pluginEnvironment: PluginEnvironment = loadPluginEnvironment()) =
+            listOf(mavenCentral, jcenter, jitpack).union(pluginEnvironment.repositories.toList()).toList()
+
     fun loadPluginInstances(): Collection<Module> {
         val classLoader = ChildFirstDownloadingClassLoader(
-                PluginSettings.localRepo, repos, PluginService::class.java.classLoader)
+                PluginSettings.localRepo, listRepos(), PluginService::class.java.classLoader)
 
+        // override the default classloader
+        ClassLoaderUtil.classLoader = classLoader
+
+        // load the already-downloaded classes
         classLoader.load()
-        DataStoreModule.storeClassLoader = classLoader
 
         val pluginConfig = fetchPluginConfig()
 
-        return mutableListOf<Module>().apply {
-            // frontends and backends are instantiated the same way
-            addAll(pluginConfig.frontends.union(pluginConfig.backends).flatMap { (_, classes) ->
-
-                classes.map { className ->
-                    @Suppress("UNCHECKED_CAST")
-                    val moduleClass: Class<Module> = classLoader.loadClass(className) as Class<Module>
-                    moduleClass.newInstance()
-                }
-            })
-
-            // stores must be instantiated with a name
-            pluginConfig.storage?.let { (_, stores) ->
-                addAll(stores.map { DataStoreModule(it) })
+        // frontends and backends are instantiated the same way
+        return pluginConfig.frontends.union(pluginConfig.backends).flatMap { (_, classes) ->
+            classes.map { className ->
+                @Suppress("UNCHECKED_CAST")
+                val moduleClass: Class<Module> = classLoader.loadClass(className) as Class<Module>
+                moduleClass.newInstance()
             }
         }
     }
 
-    private fun fetchPluginConfig(): PluginWrapper = PluginSettings.pluginsFile?.let {
-        @Suppress("UNCHECKED_CAST")
-        yamlMapper.readValue(it.toFile(), PluginWrapper::class.java)
-    }!!
+    private fun fetchPluginConfig(): PluginWrapper =
+            yamlMapper.readValue(PluginSettings.pluginsFile.toFile(), PluginWrapper::class.java)
 }

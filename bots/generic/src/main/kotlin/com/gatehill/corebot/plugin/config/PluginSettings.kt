@@ -4,7 +4,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 object PluginSettings {
-    val pluginsFile: Path? by lazy {
+    val pluginsFile: Path by lazy {
         System.getenv("PLUGIN_CONFIG_FILE")?.let { Paths.get(it) }
                 ?: throw IllegalStateException("Missing plugin configuration file")
     }

@@ -5,20 +5,37 @@ import com.gatehill.corebot.action.NoOpActionFactoryConverter
 import com.gatehill.corebot.plugin.PluginService
 import com.gatehill.corebot.plugin.config.PluginSettings
 import com.google.inject.AbstractModule
-import com.google.inject.Module
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>) {
-    val pluginService = PluginService()
+const val usage = """Usage: ./bots-generic <commands>
 
-    when (args.getOrNull(0)) {
-        "download" -> downloadPlugins(pluginService)
-        "run" -> runBot(pluginService)
-        else -> {
-            System.err.println("No command specified - try 'download' or 'run'.")
-            exitProcess(1)
+Commands:
+ clean    - clean the downloaded plugins
+ download - download dependencies
+ run      - run the bot using the downloaded dependencies
+"""
+
+fun main(args: Array<String>) {
+    if (args.isEmpty()) {
+        exitWithMessage("No command specified\n$usage")
+
+    } else {
+        val pluginService = PluginService()
+
+        args.forEach {
+            when (it) {
+                "clean" -> pluginService.clearRepo()
+                "download" -> downloadPlugins(pluginService)
+                "run" -> runBot(pluginService)
+                else -> exitWithMessage("Unsupported command '$it'\n$usage")
+            }
         }
     }
+}
+
+private fun exitWithMessage(message: String) {
+    System.err.println(message)
+    exitProcess(1)
 }
 
 private fun downloadPlugins(pluginService: PluginService) {
@@ -29,8 +46,7 @@ private fun downloadPlugins(pluginService: PluginService) {
 
 private fun runBot(pluginService: PluginService) {
     println("Loading plugins from ${PluginSettings.localRepo}")
-    val modules = mutableListOf<Module>(BotModule())
-    modules.addAll(pluginService.loadPluginInstances())
+    val modules = pluginService.loadPluginInstances() + BotModule()
     Bot.build(*modules.toTypedArray()).start()
 }
 

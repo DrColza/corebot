@@ -20,6 +20,7 @@ class TemplateConfigService {
                                          val usage: String?)
 
     private val classpathPrefix = "classpath:"
+    private val regexTemplatePattern = Pattern.compile("/(?<template>.+)/")
     private val templateFiles = mutableListOf<String>()
 
     init {
@@ -60,10 +61,10 @@ class TemplateConfigService {
     fun loadFilterConfig(templateName: String): List<FilterConfig> =
             allConfigs.filterKeys { it == templateName }.values.flatMap { config ->
                 config.map {
-                    // TODO use regex instead
-                    if (it.template.startsWith("/") && it.template.endsWith("/")) {
+                    val templateMatcher = regexTemplatePattern.matcher(it.template)
+                    if (templateMatcher.matches()) {
                         RegexFilter.RegexFilterConfig(
-                                template = Pattern.compile(it.template.substring(1, it.template.length - 1)),
+                                template = Pattern.compile(templateMatcher.group("template")),
                                 usage = it.usage
                         )
                     } else {

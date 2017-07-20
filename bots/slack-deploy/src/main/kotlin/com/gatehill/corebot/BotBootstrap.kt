@@ -1,7 +1,6 @@
 package com.gatehill.corebot
 
 import com.gatehill.corebot.action.factory.ShowHelpFactory
-import com.gatehill.corebot.chat.template.TemplateConfigService
 import com.gatehill.corebot.chat.template.TemplateService
 import com.gatehill.corebot.driver.ActionDriverFactory
 import com.gatehill.corebot.driver.jenkins.action.JenkinsActionDriver
@@ -12,8 +11,7 @@ import javax.inject.Inject
  * @author Pete Cornish {@literal <outofcoffee@gmail.com>}
  */
 class BotBootstrap @Inject constructor(actionDriverFactory: ActionDriverFactory,
-                                       templateService: TemplateService,
-                                       templateConfigService: TemplateConfigService) {
+                                       templateService: TemplateService) {
     init {
         // drivers
         actionDriverFactory.registerDriver("rundeck", RundeckActionDriver::class.java)

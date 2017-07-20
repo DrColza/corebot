@@ -1,6 +1,5 @@
 package com.gatehill.corebot.driver.items
 
-import com.gatehill.corebot.action.factory.ShowHelpFactory
 import com.gatehill.corebot.chat.template.TemplateConfigService
 import com.gatehill.corebot.chat.template.TemplateService
 import com.gatehill.corebot.driver.ActionDriverFactory

@@ -2,10 +2,17 @@ FROM openjdk:8-jdk
 
 MAINTAINER Pete Cornish <outofcoffee@gmail.com>
 
-RUN mkdir -p /opt/corebot /opt/corebot/config
+RUN mkdir -p /opt/corebot /opt/corebot/config /opt/corebot/plugins
+
+ENV PLUGIN_CONFIG_FILE=/opt/corebot/config/plugins.yml
+ENV PLUGIN_LOCAL_REPO=/opt/corebot/plugins
 
 ADD build/install/bots-generic /opt/corebot
 
-WORKDIR "/opt/corebot"
+RUN ln -s /opt/corebot/bin/bots-generic /usr/local/bin/corebot && \
+    chmod +x /usr/local/bin/corebot
 
-ENTRYPOINT [ "./bin/bots-generic" ]
+WORKDIR /opt/corebot
+
+ENTRYPOINT [ "corebot" ]
+CMD [ "run" ]

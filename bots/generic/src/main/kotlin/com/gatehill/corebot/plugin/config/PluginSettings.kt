@@ -9,5 +9,5 @@ object PluginSettings {
                 ?: throw IllegalStateException("Missing plugin configuration file")
     }
 
-    val localRepo: String by lazy { System.getenv("PLUGIN_LOCAL_REPO") ?: "/tmp/plugins" }
+    val localRepo: String by lazy { System.getenv("PLUGIN_LOCAL_REPO") ?: "/opt/corebot/plugins" }
 }
